@@ -23,6 +23,7 @@ jobs:
       - run: pip install vulcan-api icalendar
       - name: Generate ICAL feeds
         run: |
+          sudo apt install awscli
           echo "$VULCAN_ACCOUNT_JSON" > account.json
           echo "$VULCAN_KEYSTORE_JSON" > keystore.json
           python3 export-ics.py
@@ -32,4 +33,6 @@ jobs:
           VULCAN_ACCOUNT_JSON: ${{secrets.VULCAN_ACCOUNT_JSON}}
           VULCAN_KEYSTORE_JSON: ${{secrets.VULCAN_KEYSTORE_JSON}}
           VULCAN_STUDENT: ${{secrets.VULCAN_STUDENT}}
+          AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
+          AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
           
