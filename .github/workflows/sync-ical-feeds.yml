@@ -31,4 +31,5 @@ jobs:
         env:
           VULCAN_ACCOUNT_JSON: ${{secrets.VULCAN_ACCOUNT_JSON}}
           VULCAN_KEYSTORE_JSON: ${{secrets.VULCAN_KEYSTORE_JSON}}
+          VULCAN_STUDENT: ${{secrets.VULCAN_STUDENT}}
           
