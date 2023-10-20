@@ -23,6 +23,7 @@ jobs:
       - run: pip install vulcan-api icalendar
       - name: Generate ICAL feeds
         run: |
+          sudo apt update -qq
           sudo apt install awscli
           echo "$VULCAN_ACCOUNT_JSON" > account.json
           echo "$VULCAN_KEYSTORE_JSON" > keystore.json
