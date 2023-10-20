@@ -28,4 +28,7 @@ jobs:
           echo $VULCAN_KEYSTORE > keystore.json
           python3 export-ics.py
           ls
+        env:
+          VULCAN_ACCOUNT_JSON: ${{secrets.VULCAN_ACCOUNT_JSON}}
+          VULCAN_KEYSTORE_JSON: ${{secrets.VULCAN_KEYSTORE_JSON}}
           
