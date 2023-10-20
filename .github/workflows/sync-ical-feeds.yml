@@ -28,11 +28,12 @@ jobs:
           echo "$VULCAN_KEYSTORE_JSON" > keystore.json
           python3 export-ics.py
           ls
-          cat *.ics
+          aws s3 cp *.ics s3://$AWS_BUCKET_NAME/
         env:
           VULCAN_ACCOUNT_JSON: ${{secrets.VULCAN_ACCOUNT_JSON}}
           VULCAN_KEYSTORE_JSON: ${{secrets.VULCAN_KEYSTORE_JSON}}
           VULCAN_STUDENT: ${{secrets.VULCAN_STUDENT}}
           AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+          AWS_BUCKET_NAME: ${{secrets.AWS_BUCKET_NAME}}
           
