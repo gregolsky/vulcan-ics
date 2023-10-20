@@ -23,8 +23,8 @@ jobs:
       - run: pip install vulcan-api icalendar
       - name: Generate ICAL feeds
         run: |
-          echo "$VULCAN_ACCOUNT" > account.json
-          echo "$VULCAN_KEYSTORE" > keystore.json
+          echo "$VULCAN_ACCOUNT_JSON" > account.json
+          echo "$VULCAN_KEYSTORE_JSON" > keystore.json
           python3 export-ics.py
           ls
           cat *.ics
