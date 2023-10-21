@@ -7,12 +7,15 @@ from uuid import uuid4
 from datetime import datetime
 from datetime import date
 from datetime import timedelta
+import pytz
 
 from vulcan import Account
 from vulcan import Keystore
 from vulcan import Vulcan
 
 from icalendar import Calendar, Event
+
+tz = pytz.timezone('Europe/Warsaw')
 
 async def main():
 
@@ -53,8 +56,8 @@ def homework_to_event(homework):
     event = Event()
     summary = f'{homework.subject.name}/praca domowa'
     event.add('summary', summary)
-    event.add('dtstart', homework.deadline.date_time)
-    event.add('dtend', homework.deadline.date_time + timedelta(minutes=45))
+    event.add('dtstart', tz.localize(homework.deadline.date_time))
+    event.add('dtend', tz.localize(homework.deadline.date_time + timedelta(days=1)))
     event.add('dtstamp', datetime.utcnow())
     event.add('description', homework.content)
     hashval = summary + str(homework.deadline.date_time)
@@ -65,8 +68,8 @@ def exam_to_event(exam):
     event = Event()
     summary = f'{exam.subject.name}/{exam.type}'
     event.add('summary', summary)
-    event.add('dtstart', exam.deadline.date_time)
-    event.add('dtend', exam.deadline.date_time + timedelta(minutes=45))
+    event.add('dtstart', tz.localize(exam.deadline.date_time))
+    event.add('dtend', tz.localize(exam.deadline.date_time + timedelta(days=1)))
     event.add('dtstamp', exam.date_modified.date_time)
     event.add('description', exam.topic)
     hashval = summary + str(exam.deadline.date_time)
