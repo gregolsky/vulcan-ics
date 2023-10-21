@@ -1,6 +1,7 @@
 import asyncio
 import json
 import os
+import hashlib
 
 from uuid import uuid4
 from datetime import datetime
@@ -31,16 +32,18 @@ async def main():
 
         a_week_ago = date.today() + timedelta(days = -7)
 
+        cal_events = []
         exams = await client.data.get_exams(last_sync=a_week_ago)
-        exams = [ e async for e in exams ]
-        
-        cal_display_name = f'Sprawdziany {selected_student.class_}'
-        create_calendar(cal_display_name, exams, exam_to_event)
+        for item in [ e async for e in exams ]:
+            cal_events.append(exam_to_event(item))
 
         homework = await client.data.get_homework(last_sync=a_week_ago)
-        homework = [ h async for h in homework ]
-        cal_display_name = f'Praca domowa {selected_student.class_}'
-        create_calendar(cal_display_name, homework, homework_to_event)
+        for item in [ h async for h in homework ]:
+            cal_events.append(homework_to_event(item))
+
+
+        cal_display_name = f'{selected_student.pupil.first_name} {selected_student.pupil.last_name[0]}'
+        create_calendar(cal_display_name, cal_events)
 
         #lessons = await client.get_lessons(date_to = datetime.today + timedelta(days = 14))
     finally:
@@ -48,32 +51,35 @@ async def main():
 
 def homework_to_event(homework):
     event = Event()
-    event.add('summary', f'{homework.subject.name} / praca domowa')
+    summary = f'{homework.subject.name}/praca domowa'
+    event.add('summary', summary)
     event.add('dtstart', homework.deadline.date_time)
     event.add('dtend', homework.deadline.date_time + timedelta(minutes=45))
     event.add('dtstamp', datetime.utcnow())
     event.add('description', homework.content)
-    event['uid'] = str(uuid4())
+    hashval = summary + str(homework.deadline.date_time)
+    event['uid'] = hashlib.md5(hashval.encode('utf-8')).hexdigest()
     return event
 
 def exam_to_event(exam):
     event = Event()
-    event.add('summary', f'{exam.subject.name} / {exam.type}')
+    summary = f'{exam.subject.name}/{exam.type}'
+    event.add('summary', summary)
     event.add('dtstart', exam.deadline.date_time)
     event.add('dtend', exam.deadline.date_time + timedelta(minutes=45))
     event.add('dtstamp', exam.date_modified.date_time)
     event.add('description', exam.topic)
-    event['uid'] = str(uuid4())
+    hashval = summary + str(exam.deadline.date_time)
+    event['uid'] = hashlib.md5(hashval.encode('utf-8')).hexdigest()
     return event
 
-def create_calendar(name, items, to_event):
+def create_calendar(name, events):
     cal = Calendar()
     cal.add('prodid', name)
     cal.add('version', '2.0')
 
-    for item in items:
-        event = to_event(item)
-        cal.add_component(event)
+    for e in events:
+        cal.add_component(e)
 
     with open(f'{name.lower().replace(" ", "_")}.ics', 'wb') as f:
         f.write(cal.to_ical())
