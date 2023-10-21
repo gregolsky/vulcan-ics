@@ -2,25 +2,23 @@
  
 name:
   Generate ICAL feeds and send to S3
- 
-  # Controls when the workflow will run
 on:
-  # Triggers the workflow every 5 minutes
   workflow_dispatch:  
   schedule:
-    - cron: "11 * * * *"
+    - cron: "11 */2 * * *"
  
 jobs:
   sync_ical_feeds:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
  
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
-      # Runs a single command using the runners shell
+        with:
+          cache: 'pip'
+
       - run: pip install vulcan-api icalendar
+      
       - name: Generate ICAL feeds
         run: |
           sudo apt update -qq
