@@ -1,2 +1,3 @@
 pytz
-vulcan
+vulcan-api
+icalendar
