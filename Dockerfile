@@ -2,7 +2,7 @@ FROM python:3.8
 
 WORKDIR /app
 
-COPY *.py requirements.txt /app/
+COPY *.py *.sh requirements.txt /app/
 
 RUN pip install --no-cache-dir -r requirements.txt
 

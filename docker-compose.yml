@@ -16,7 +16,9 @@ services:
       - AWS_DEFAULT_REGION=us-east-1
     restart: always
     command: >
+      set -e
       while true; do 
-        python export-ics.py && sleep 3h || exit 1
-        for f in *.ics; do aws s3 cp "$f" "s3://$AWS_BUCKET_NAME/$f"; done
+        python export-ics.py
+        ./upload-ics-to-s3.sh
+        sleep 3h
       done
