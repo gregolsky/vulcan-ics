@@ -1,0 +1,22 @@
+version: '3'
+services:
+  vulcan-ics:
+    image: vulcan-ics
+    volumes:
+      - ./path/to/your/account.json:/app/account.json
+      - ./path/to/your/keystore.json:/app/keystore.json
+    environment:
+      - VULCAN_TOKEN=your_vulcan_token
+      - VULCAN_SYMBOL=your_vulcan_symbol
+      - VULCAN_PIN=your_vulcan_pin
+      - VULCAN_STUDENT=your_vulcan_student
+      - AWS_ACCESS_KEY_ID=AKIA
+      - AWS_SECRET_ACCESS_KEY=AAA
+      - AWS_BUCKET_NAME=bucket
+      - AWS_DEFAULT_REGION=us-east-1
+    restart: always
+    command: >
+      while true; do 
+        python export-ics.py && sleep 3h || exit 1
+        for f in *.ics; do aws s3 cp "$f" "s3://$AWS_BUCKET_NAME/$f"; done
+      done

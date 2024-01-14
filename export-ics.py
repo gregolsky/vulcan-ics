@@ -1,9 +1,9 @@
+import logging
 import asyncio
 import json
 import os
 import hashlib
 
-from uuid import uuid4
 from datetime import datetime
 from datetime import date
 from datetime import timedelta
@@ -25,7 +25,7 @@ async def main():
     with open("account.json") as f:
         account = Account.load(f)
 
-    client = Vulcan(keystore, account)
+    client = Vulcan(keystore, account, logging_level=logging.INFO)
 
     try:
         students = await client.get_students()
