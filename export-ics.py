@@ -49,6 +49,20 @@ async def main():
         create_calendar(cal_display_name, cal_events)
 
         #lessons = await client.get_lessons(date_to = datetime.today + timedelta(days = 14))
+    except Exception as e:
+
+        status = getattr(e, 'status')
+        message = getattr(e, 'message')
+        req_info = {getattr(e, 'request_info')}
+        headers = getattr(e, 'headers')
+        history = getattr(e, 'history')
+
+        print(f'{req_info.method} {req_info.url} ')
+        for key in headers:
+            print(f'{key}: {req_info.headers[key]}')
+        print(f'{status} {message}\r\n')
+
+        raise
     finally:
         await client.close()
 
