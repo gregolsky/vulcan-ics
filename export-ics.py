@@ -61,7 +61,8 @@ async def main():
             print(f'{key}: {req_info.headers[key]}')
 
         print(f'{status} {message}\r\n')
-        print(f'{history[0].text("utf-8")}')
+        if len(history) > 0:
+            print(f'{await history[-1].text("utf-8")}')
 
         raise
     finally:
