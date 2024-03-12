@@ -163,3 +163,4 @@ account.json
 keystore.json
 *.ics
 *.env
+*.rest

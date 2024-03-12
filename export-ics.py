@@ -59,7 +59,9 @@ async def main():
         print(f'{req_info.method} {req_info.url} ')
         for key in req_info.headers:
             print(f'{key}: {req_info.headers[key]}')
+
         print(f'{status} {message}\r\n')
+        print(f'{history[0].text('utf-8')}')
 
         raise
     finally:
