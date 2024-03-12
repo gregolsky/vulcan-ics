@@ -53,12 +53,11 @@ async def main():
 
         status = getattr(e, 'status')
         message = getattr(e, 'message')
-        req_info = {getattr(e, 'request_info')}
-        headers = getattr(e, 'headers')
         history = getattr(e, 'history')
+        req_info = e.request_info
 
         print(f'{req_info.method} {req_info.url} ')
-        for key in headers:
+        for key in req_info.headers:
             print(f'{key}: {req_info.headers[key]}')
         print(f'{status} {message}\r\n')
 
