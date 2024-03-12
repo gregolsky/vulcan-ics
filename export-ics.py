@@ -61,7 +61,7 @@ async def main():
             print(f'{key}: {req_info.headers[key]}')
 
         print(f'{status} {message}\r\n')
-        print(f'{history[0].text('utf-8')}')
+        print(f'{history[0].text("utf-8")}')
 
         raise
     finally:
