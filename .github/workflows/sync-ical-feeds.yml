@@ -1,9 +1,7 @@
 name:
   Generate ICAL feeds and send to S3
 on:
-  workflow_dispatch:  
-  schedule:
-    - cron: "11 */2 * * *"
+  workflow_dispatch:
  
 jobs:
   sync_ical_feeds:
