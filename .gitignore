@@ -161,6 +161,7 @@ cython_debug/
 
 account.json
 keystore.json
+vulcan-creds.txt
 *.ics
 *.env
 *.rest
