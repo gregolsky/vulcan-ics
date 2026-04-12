@@ -62,7 +62,8 @@ async def main():
 
         print(f'{status} {message}\r\n')
         if len(history) > 0:
-            print(f'{await history[-1].text("utf-8")}')
+            responseText = await history[-1].text()
+            print(f'{responseText}')
 
         raise
     finally:
