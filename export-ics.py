@@ -51,19 +51,22 @@ async def main():
         #lessons = await client.get_lessons(date_to = datetime.today + timedelta(days = 14))
     except Exception as e:
 
-        status = getattr(e, 'status')
-        message = getattr(e, 'message')
-        history = getattr(e, 'history')
-        req_info = e.request_info
+        req_info = getattr(e, 'request_info', None)
+        if req_info is not None:
+            status = getattr(e, 'status', None)
+            message = getattr(e, 'message', None)
+            history = getattr(e, 'history', [])
 
-        print(f'{req_info.method} {req_info.url} ')
-        for key in req_info.headers:
-            print(f'{key}: {req_info.headers[key]}')
+            print(f'{req_info.method} {req_info.url} ')
+            for key in req_info.headers:
+                print(f'{key}: {req_info.headers[key]}')
 
-        print(f'{status} {message}\r\n')
-        if len(history) > 0:
-            responseText = await history[-1].text()
-            print(f'{responseText}')
+            print(f'{status} {message}\r\n')
+            if len(history) > 0:
+                responseText = await history[-1].text()
+                print(f'{responseText}')
+        else:
+            print(f'{type(e).__name__}: {e}')
 
         raise
     finally:
@@ -106,6 +109,5 @@ def create_calendar(name, events):
 
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    asyncio.run(main())
 
