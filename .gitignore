@@ -165,3 +165,9 @@ vulcan-creds.txt
 *.ics
 *.env
 *.rest
+
+# Node
+node_modules/
+
+# Debug screenshots
+scripts/*.png

@@ -2,35 +2,33 @@ name:
   Generate ICAL feeds and send to S3
 on:
   workflow_dispatch:
- 
+
 jobs:
   sync_ical_feeds:
     runs-on: ubuntu-latest
- 
+
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-node@v4
         with:
-          cache: 'pip'
+          node-version: '20'
+          cache: 'npm'
 
-      - run: pip install vulcan-api icalendar awscli
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: pip install awscli
 
       - name: Generate ICAL feeds
         run: |
-          echo "$VULCAN_ACCOUNT_JSON" > account.json
-          echo "$VULCAN_KEYSTORE_JSON" > keystore.json
-          python3 -c "import json; json.load(open('account.json')); print('account.json OK')"
-          python3 -c "import json; json.load(open('keystore.json')); print('keystore.json OK')"
-          python3 -c "import json; d=json.load(open('account.json')); print('RestURL:', d.get('RestURL', 'MISSING'))"
-          python3 export-ics.py
+          node export-ics.mjs
           ls
           for f in *.ics; do aws s3 cp "$f" "s3://$AWS_BUCKET_NAME/$f"; done
         env:
-          VULCAN_ACCOUNT_JSON: ${{secrets.VULCAN_ACCOUNT_JSON}}
-          VULCAN_KEYSTORE_JSON: ${{secrets.VULCAN_KEYSTORE_JSON}}
-          VULCAN_STUDENT: ${{secrets.VULCAN_STUDENT}}
+          VULCAN_URL: ${{secrets.VULCAN_URL}}
+          VULCAN_USERNAME: ${{secrets.VULCAN_USERNAME}}
+          VULCAN_PASSWORD: ${{secrets.VULCAN_PASSWORD}}
+          VULCAN_SCHOOL_UNIT_ID: ${{secrets.VULCAN_SCHOOL_UNIT_ID}}
           AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
           AWS_BUCKET_NAME: ${{secrets.AWS_BUCKET_NAME}}
           AWS_DEFAULT_REGION: us-east-1
-          
