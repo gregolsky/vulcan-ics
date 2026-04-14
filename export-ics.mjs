@@ -282,6 +282,14 @@ async function main() {
       const exams = await scrapeExams(page);
       const homework = await scrapeHomework(page);
       addStudentEvents(cal, s.firstName, exams, homework);
+
+      if (s.firstName) {
+        const perKid = ical({ name: `vulcan ${s.firstName}` });
+        addStudentEvents(perKid, s.firstName, exams, homework);
+        const fname = `vulcan_${s.firstName.toLowerCase()}.ics`;
+        writeFileSync(fname, perKid.toString());
+        console.log(`Saved ${fname}`);
+      }
     }
   } finally {
     await browser.close();
