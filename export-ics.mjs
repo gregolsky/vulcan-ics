@@ -34,7 +34,13 @@ async function login(page) {
 async function navigateToUczen(page) {
   console.log(`Navigating to Uczeń app...`);
   await page.goto(UCZEN_URL, { waitUntil: 'networkidle' });
-  await page.waitForTimeout(6000);
+  // Wait for the student combobox to be populated (the "{class} {year} - {name}" input).
+  await page.waitForFunction(
+    () => [...document.querySelectorAll('input')].some(i => /^\S+\s+\d{4}\s+-\s+/.test(i.value || '')),
+    null,
+    { timeout: 20000 },
+  ).catch(() => { /* single-student accounts may not have this combobox */ });
+  await page.waitForTimeout(1500);
 }
 
 // Student appears in an ExtJS combobox with value like "6B 2025 - Tymon Lachowski".
@@ -78,11 +84,11 @@ async function discoverStudents(page) {
   await page.keyboard.press('Escape');
   await page.waitForTimeout(500);
 
-  const list = (options.length ? options : [current.value]).map(v => ({
-    label: v.match(STUDENT_VAL_RE)[1].trim(),
-    value: v,
-  }));
-  console.log(`Found students: ${list.map(s => s.label).join(', ')}`);
+  const list = (options.length ? options : [current.value]).map(v => {
+    const fullName = v.match(STUDENT_VAL_RE)[1].trim();
+    return { firstName: fullName.split(/\s+/)[0], value: v };
+  });
+  console.log(`Found ${list.length} students: ${list.map(s => s.firstName).join(', ')}`);
   return list;
 }
 
@@ -102,7 +108,7 @@ async function selectStudent(page, student) {
 
   const currentVal = await page.inputValue(`#${input}`);
   if (currentVal === student.value) {
-    console.log(`Already on ${student.label}`);
+    console.log(`Already on ${student.firstName}`);
     return;
   }
 
@@ -110,7 +116,7 @@ async function selectStudent(page, student) {
   await page.waitForTimeout(800);
   await page.click(`text="${student.value}"`);
   await page.waitForTimeout(3000);
-  console.log(`Selected student: ${student.label}`);
+  console.log(`Selected student: ${student.firstName}`);
 }
 
 function parseDate(dateStr) {
@@ -222,9 +228,7 @@ async function scrapeHomework(page) {
   return homework;
 }
 
-function buildCalendar(studentName, exams, homework) {
-  const cal = ical({ name: studentName });
-  const firstName = (studentName || '').split(/\s+/)[0] || studentName;
+function addStudentEvents(cal, firstName, exams, homework) {
   const tag = firstName ? ` (${firstName})` : '';
 
   for (const exam of exams) {
@@ -253,23 +257,6 @@ function buildCalendar(studentName, exams, homework) {
       stamp: new Date(),
     });
   }
-
-  return cal;
-}
-
-async function exportForStudent(page, student) {
-  await navigateToUczen(page);
-  await selectStudent(page, student);
-
-  const exams = await scrapeExams(page);
-  const homework = await scrapeHomework(page);
-
-  const displayName = student.label || 'vulcan';
-  const cal = buildCalendar(displayName, exams, homework);
-
-  const filename = `${displayName.toLowerCase().replace(/\s+/g, '_')}.ics`;
-  writeFileSync(filename, cal.toString());
-  console.log(`Saved ${filename}`);
 }
 
 async function main() {
@@ -280,19 +267,28 @@ async function main() {
 
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
+  const cal = ical({ name: 'vulcan' });
 
   try {
     await login(page);
     await navigateToUczen(page);
     const students = await discoverStudents(page);
 
-    for (const s of students) {
-      console.log(`\n=== Exporting ${s.label || '(default student)'} ===`);
-      await exportForStudent(page, s);
+    for (let i = 0; i < students.length; i++) {
+      const s = students[i];
+      console.log(`\n=== Exporting ${s.firstName || 'student'} (${i + 1}/${students.length}) ===`);
+      if (i > 0) await navigateToUczen(page);
+      await selectStudent(page, s);
+      const exams = await scrapeExams(page);
+      const homework = await scrapeHomework(page);
+      addStudentEvents(cal, s.firstName, exams, homework);
     }
   } finally {
     await browser.close();
   }
+
+  writeFileSync('vulcan.ics', cal.toString());
+  console.log('Saved vulcan.ics');
 }
 
 main().catch(err => {
